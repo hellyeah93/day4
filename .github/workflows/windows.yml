@@ -1,0 +1,62 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+      npm_config_audit: "false"
+      npm_config_fund: "false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Cache Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/electron
+            .cache/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        timeout-minutes: 10
+        # Skip the ~100 MB Electron binary download during install: it is the step that
+        # stalled forever, and electron-builder fetches its own copy when packaging.
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+        # package-lock.json was generated on Linux, so it lacks the Windows-only native
+        # packages (@rollup/rollup-win32-x64-msvc, @esbuild/win32-x64). Dropping it lets
+        # npm resolve the right optional dependencies for this runner.
+        run: |
+          Remove-Item package-lock.json -ErrorAction SilentlyContinue
+          npm install --no-audit --no-fund --fetch-retries=5 --fetch-timeout=60000
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Build Windows executable
+        run: npx electron-builder --win nsis --x64 --publish never
+
+      - name: Upload Windows Setup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayZero-Windows-Setup
+          path: release/*.exe
+          if-no-files-found: error
