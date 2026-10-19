@@ -1,0 +1,6 @@
+{
+  "name": "DAYZERO — Mission Planner",
+  "description": "DayZero — plan the day, track the mission.",
+  "prompt": "DayZero Planner",
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A scheduled mission task or action item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "startDate": { "type": "string", "maxLength": 10 },
+        "endDate": { "type": "string", "maxLength": 10 },
+        "deadline": { "type": "string", "maxLength": 10 },
+        "priority": { "type": "string", "enum": ["low", "normal", "high"] },
+        "completedDates": { "type": "array" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "recurrence": { "type": "string", "enum": ["none", "daily", "weekly", "monthly"] }
+      },
+      "required": ["id", "title", "startDate", "endDate"]
+    },
+    "Countdown": {
+      "title": "Countdown",
+      "description": "A countdown target event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 10 },
+        "startDate": { "type": "string", "maxLength": 10 },
+        "tone": { "type": "string", "enum": ["tactical", "disciplined", "motivational"] }
+      },
+      "required": ["id", "title", "date", "startDate", "tone"]
+    },
+    "UserAppData": {
+      "title": "UserAppData",
+      "description": "User planner data including tasks, countdown targets, and settings",
+      "type": "object",
+      "properties": {
+        "tasks": { "type": "array" },
+        "countdowns": { "type": "array" },
+        "rangeStart": { "type": "string", "maxLength": 10 },
+        "rangeEnd": { "type": "string", "maxLength": 10 },
+        "reminderTime": { "type": "string", "maxLength": 5 },
+        "remindersEnabled": { "type": "boolean" },
+        "tone": { "type": "string", "enum": ["tactical", "disciplined", "motivational"] },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["tasks", "countdowns", "rangeStart", "rangeEnd"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/app/data": {
+      "schema": "UserAppData",
+      "description": "Private application state and planner data for an authenticated user"
+    }
+  }
+}

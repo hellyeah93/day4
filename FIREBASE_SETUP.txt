@@ -1,0 +1,1 @@
+Firebase is optional for local mode. Copy .env.example to .env and fill the Firebase Web App config to enable authentication and cloud sync. Never place service account keys in this project.
